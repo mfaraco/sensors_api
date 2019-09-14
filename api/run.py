@@ -122,9 +122,39 @@ class Device(Resource):
 
         return {'message': 'Device updated', 'data': args}, 201
 
+class ReadingList(Resource):
+    def get(self):
+        shelf = get_readings_db()
+        keys = list(shelf.keys())
+
+        readings = []
+
+        for key in keys:
+            readings.append(shelf[key])
+
+        return {'message': 'Success', 'data': readings}, 200
+
+class Reading(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+
+        parser.add_argument('station_id', required=True)
+        parser.add_argument('sensor_id', required=True)
+        parser.add_argument('reading', required=True)
+        parser.add_argument('timestamp', required=True)
+
+
+        # Parse the arguments into an object
+        args = parser.parse_args()
+
+        shelf = get_readings_db()
+        shelf[args['sensor_id'] + args['timestamp']] = args
+        return {'message': 'Reading registered', 'data': args}, 201
 
 api.add_resource(DeviceList, '/devices')
 api.add_resource(Device, '/device/<string:identifier>')
+api.add_resource(ReadingList, '/readings')
+api.add_resource(Reading, '/reading')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
