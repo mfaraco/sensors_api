@@ -1,5 +1,7 @@
 # sensors_api
 
+Simple Sensors Api
+
 # device_collection
 /devices
 
