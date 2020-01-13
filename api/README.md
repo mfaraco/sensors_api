@@ -1,6 +1,6 @@
 # sensors_api
 
-Simple Sensors Api
+Sensors REST Api
 
 # device_collection
 /devices

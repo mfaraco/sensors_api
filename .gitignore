@@ -1,6 +1,6 @@
 ./sample_data
 .vscode
 api/.vscode
-api/devices.db
+api/*.db
 api/postman/
-api/readings.db
+api/env
