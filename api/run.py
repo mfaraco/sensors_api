@@ -3,7 +3,7 @@ import markdown
 from datetime import datetime
 
 # Import the framework
-from flask import Flask, g, jsonify
+from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -19,6 +19,7 @@ ma = Marshmallow(app)
 # Create the API
 api = Api(app)
 
+
 # Create Models
 class Station(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,12 +33,25 @@ class Station(db.Model):
         self.longitude = longitude
         self.app_version = app_version
 
+
 class Reading(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    reading = db.Column(db.String(20), unique=False, nullable=False)
-    app_version = db.Column(db.String(10), unique=False, nullable=True)
-    station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    timestamp = db.Column(db.DateTime,
+                          nullable=False,
+                          default=datetime.utcnow
+                          )
+    reading = db.Column(db.String(20),
+                        unique=False,
+                        nullable=False
+                        )
+    app_version = db.Column(db.String(10),
+                            unique=False,
+                            nullable=True
+                            )
+    station_id = db.Column(db.Integer,
+                           db.ForeignKey('station.id'),
+                           nullable=False
+                           )
 
     def __init__(self, timestamp, reading, app_version, station_id):
         self.timestamp = datetime.utcnow()
@@ -49,10 +63,13 @@ class Reading(db.Model):
 # Schemas for JSON representation
 class StationSchema(ma.Schema):
     class Meta:
-        fields = ("id","latitude","longitude","app_version")
+        fields = ("id", "latitude", "longitude", "app_version")
+
+
 class ReadingSchema(ma.Schema):
     class Meta:
-        fields = ("id","timestamp","reading","app_version","station_id")
+        fields = ("id", "timestamp", "reading", "app_version", "station_id")
+
 
 # Init schema
 station_schema = StationSchema()
@@ -66,10 +83,10 @@ def index():
     """Present barebones documentation"""
 
     # Open the README file
-    with open(os.path.dirname(app.root_path) + '/README.md', 'r') as markdown_file:
+    with open(os.path.dirname(app.root_path) + '/README.md', 'r') as md_file:
 
         # Read the content of the file
-        content = markdown_file.read()
+        content = md_file.read()
 
         # Convert to HTML
         return markdown.markdown(content)
@@ -78,8 +95,9 @@ def index():
 @app.route("/init/")
 def init():
     """Initialize Database"""
-    res = db.create_all()
+    db.create_all()
     return "OK"
+
 
 # Handler for all devices list
 class handler_DeviceList(Resource):
@@ -88,7 +106,8 @@ class handler_DeviceList(Resource):
 
         return stations_schema.dump(all_stations), 200
 
-# HAndler for CRUD operations on Stations
+
+# Handler for CRUD operations on Stations
 class handler_Device(Resource):
     def get(self, identifier):
         """ Returns a Station. """
@@ -108,10 +127,10 @@ class handler_Device(Resource):
         # Parse the arguments into an object
         args = parser.parse_args()
 
-        station = Station( args.latitude,
-                           args.longitude,
-                           args.app_version
-                           )
+        station = Station(args.latitude,
+                          args.longitude,
+                          args.app_version
+                          )
 
         db.session.add(station)
         db.session.commit()
@@ -124,7 +143,7 @@ class handler_Device(Resource):
 
         db.session.delete(station)
         db.session.commit()
-        
+
         return '', 204
 
     def put(self, identifier):
@@ -149,12 +168,14 @@ class handler_Device(Resource):
 
         return station_schema.dump(station), 201
 
+
 class handler_ReadingList(Resource):
     def get(self):
         """ Returns All readings. """
         all_readings = Reading.query.all()
 
         return readings_schema.dump(all_readings), 200
+
 
 class handler_Reading(Resource):
     def post(self):
@@ -170,18 +191,19 @@ class handler_Reading(Resource):
         # Parse the arguments into an object
         args = parser.parse_args()
 
-        reading = Reading( station_id = args.station_id,
-                           reading = args.reading,
-                           timestamp = datetime.utcnow(),
-                           app_version = args.app_version
-                           )
+        reading = Reading(station_id=args.station_id,
+                          reading=args.reading,
+                          timestamp=datetime.utcnow(),
+                          app_version=args.app_version
+                          )
         # If the stations doesn't exist fail
-        station = Station.query.get_or_404(args.station_id)
+        Station.query.get_or_404(args.station_id)
 
         db.session.add(reading)
         db.session.commit()
 
         return reading_schema.dump(reading), 201
+
 
 # Routes Definitions
 api.add_resource(handler_DeviceList, '/devices')

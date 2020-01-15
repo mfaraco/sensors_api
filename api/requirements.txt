@@ -2,3 +2,4 @@ Flask==1.1.1
 flask-restful==0.3.7
 markdown==2.6.11
 Flask-SQLAlchemy==2.4.1
+flask-marshmallow==0.10.1
